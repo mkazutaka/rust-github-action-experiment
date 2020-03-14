@@ -33,10 +33,13 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RUSTC_WRAPPER: sccache
+      SCCACHE_DIR: /home/runner/.cargo/sccache
+      SCCACHE_CACHE_SIZE: 300M
+      SCCACHE_IDLE_TIMEOUT: 0
     steps:
       - uses: actions/checkout@v2
       # For sccache
-      - name: Install sccache
+      - name: "Install sccache"
         env:
           LINK: https://github.com/mozilla/sccache/releases/download
           SCCACHE_VERSION: 0.2.13
@@ -47,22 +50,24 @@ jobs:
           mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
           echo "::add-path::$HOME/.local/bin"
       # Caching Cargo
-      - uses: actions/cache@v1
+      - name: "Run actions/cache@v1 for cargo registry"
+        uses: actions/cache@v1
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions/cache@v1
+      - name: "Run actions/cache@v1 for cargo index"
+        uses: actions/cache@v1
         with:
           path: ~/.cargo/git
           key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions/cache@v1
+      - name: "Run actions/cache@v1 for sccache"
+        uses: actions/cache@v1
         with:
-          path: target
+          path: ~/.cargo/sccache
           key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions/cache@v1
-        with:
-          path: ~/.cache/sccache
-          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+      - name: "Start sccache server"
+        run: |
+          sccache --start-server
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
