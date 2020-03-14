@@ -71,11 +71,6 @@ jobs:
       with:
         path: ~/.cargo/git
         key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-    - name: "Run actions/cache@v1 for cargo build"
-      uses: actions/cache@v1
-      with:
-        path: target
-        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
     - name: "Run actions/cache@v1 for sccache"
       uses: actions/cache@v1
       with:
